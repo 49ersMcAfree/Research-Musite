@@ -10,6 +10,7 @@ import Ptm from './components/super/ptm/ptm';
 import Contact from './components/super/contact/contact';
 import Api from './components/super/api/api';
 import Help from './components/super/help/help';
+import DashboardTracking from './components/super/dashboard/DashboardTracking';
 import Profile from './components/super/profile/profile';
 import Output from './components/super/output/output';
 import Footer from './components/super/footer/footer';
@@ -28,6 +29,7 @@ class Main extends Component {
         showAPI:false,
         showContact:false,//展示contact页面
         showHelp:false,//展示help页面
+  showDashboard:false,
 		 data: "",
          processeddata:"",//data after preprocessing
 		 time: "",
@@ -1242,6 +1244,21 @@ handleuploadpredict = () => {
       })
   }
 
+  handleShowDashboard = e => {
+    window.scrollTo(0, 0);
+    this.setState({
+      showDashboard: true,
+      showHelp:false,
+      showContact:false,
+      showPredict: false,
+      showOutput: false,
+      showProOutput:false,
+      showPtm: false,
+      showAPI:false,
+      showProfile:false,
+    })
+  }
+
   //查看网站访问量
   getVisitors = () => {
     $.getJSON('../static/visitors/visitors_ip.json', data => {
@@ -1333,9 +1350,9 @@ handleuploadpredict = () => {
         }
 		return (
 		<div className = {style.main}>
-        <header>
-				  <Header handleShowPtm = {this.handleShowPtm} handleShowAPI={this.handleShowAPI} handleShowContact={this.handleShowContact} handleShowHelp={this.handleShowHelp} handleShowPredict = {this.handleShowPredict} handleShowProfile = {this.handleShowProfile}/>
-		</header>
+  <header>
+      <Header handleShowPtm = {this.handleShowPtm} handleShowAPI={this.handleShowAPI} handleShowContact={this.handleShowContact} handleShowHelp={this.handleShowHelp} handleShowDashboard={this.handleShowDashboard} handleShowPredict = {this.handleShowPredict} handleShowProfile = {this.handleShowProfile}/>
+  </header>
         <Summary visitors = {this.state.visitors} num_protein = {this.state.processed_num_proteins} num_sites = {this.state.processed_num_sites}/>
         <main ref = "main" className = { showresult ? style.large : style.small }>
                 <div className = {this.state.showPtm ? style.ptm : style.ptmHide}>
@@ -1351,6 +1368,9 @@ handleuploadpredict = () => {
                 <div className = {this.state.showHelp? style.help:style.helpHide}>
                     <Help showHelp={this.state.showHelp} handleShowAPI={this.handleShowAPI}/>
                 </div>
+        <div className = {this.state.showDashboard? style.help:style.helpHide}>
+          <DashboardTracking />
+        </div>
                 <div className ={this.state.showProfile? style.profile:style.profileHide}>
                     <Profile userId = {this.state.userId} 
                              space = {this.state.space} 

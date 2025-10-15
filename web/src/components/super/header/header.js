@@ -1,4 +1,5 @@
 import React from 'react';
+import { withRouter } from 'react-router-dom';
 import style from './header.module.css';
 
 
@@ -73,6 +74,19 @@ class Header extends React.Component{
     handleMusite = () => {
        window.open("http://gene.rnet.missouri.edu/musite");
     }
+
+		handleDashboard = () => {
+			 	 // Use the same in-app show handler pattern as Help/API/Contact
+			 	 if(this.props.handleShowDashboard){
+			 		 this.props.handleShowDashboard();
+			 	 } else {
+			 		 try{
+			 			 this.props.history.push('/dashboard-tracking');
+			 		 }catch(err){
+			 			 window.location = '/dashboard-tracking';
+			 		 }
+			 	 }
+		}
     
     //handleHelp = ()=>
     //{
@@ -275,8 +289,9 @@ class Header extends React.Component{
                                     <li className="nav-item active" onMouseLeave={this.onMouseLeave}>
                                         <span className="nav-link"  onClick={this.onMouseClickContact}>Contact</span>
                                     </li>
-                                      <li className="nav-item active"><span className="nav-link" onClick = {this.handleShowHelp}>Help</span></li>
-							          <li className="nav-item active"><span className="nav-link" onClick = {this.handleMusite}>Musite(SVM version)</span></li>
+									<li className="nav-item active"><span className="nav-link" onClick = {this.handleShowHelp}>Help</span></li>
+									<li className="nav-item active"><span className="nav-link" onClick = {this.handleDashboard}>Dashboard Tracking</span></li>
+									<li className="nav-item active"><span className="nav-link" onClick = {this.handleMusite}>Musite(SVM version)</span></li>
                                 </ul>
                             </div>
 						</nav>
@@ -287,7 +302,7 @@ class Header extends React.Component{
 }
 
 
-export default Header
+export default withRouter(Header)
 
 
 /*
