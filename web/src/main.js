@@ -1130,6 +1130,7 @@ handleuploadpredict = () => {
         showContact:false,
         showAPI:false,
         showHelp:false,
+        showDashboard:false,
       })
     //}
   }
@@ -1148,6 +1149,7 @@ handleuploadpredict = () => {
       showAPI:false,
       showContact:false,
       showHelp:false,
+  showDashboard:false,
       data: "",
       modelOptions: [{label: "Phosphorylation (S,T)", value:"Phosphoserine_Phosphothreonine"}], //default one 如果不想要，就设为null
     })
@@ -1172,6 +1174,7 @@ handleuploadpredict = () => {
         setTimeout(() => window.scrollTo(0, this.refs.footer.offsetTop), 200); 
 		this.setState({
       showProOutput: this.state.showProfile? true:false,
+    showDashboard:false,
       //showPtm: false  
 		})
 	}
@@ -1189,6 +1192,7 @@ handleuploadpredict = () => {
         showHelp:false,
         showAPI:false,
         showProfile:false,
+        showDashboard:false,
         showContact:false,
       })
     //}
@@ -1213,7 +1217,8 @@ handleuploadpredict = () => {
           showPtm: false,
           showAPI:false,
           showProfile:false,
-          showHelp:false,//展示help页面
+      showHelp:false,//展示help页面
+      showDashboard:false,
       })
   }
 
@@ -1227,7 +1232,8 @@ handleuploadpredict = () => {
           showPtm: false,
           showAPI:true,
           showProfile:false,
-          showHelp:false,//展示help页面
+      showHelp:false,//展示help页面
+      showDashboard:false,
       })
   }
   handleShowHelp=e=>{
@@ -1241,6 +1247,7 @@ handleuploadpredict = () => {
           showPtm: false,
           showAPI:false,
           showProfile:false,
+      showDashboard:false,
       })
   }
 
@@ -1257,6 +1264,14 @@ handleuploadpredict = () => {
       showAPI:false,
       showProfile:false,
     })
+  }
+
+  handleHome=() => {
+    // ensure dashboard hidden when returning home
+    this.setState({
+      showDashboard: false
+    });
+    this.handleShowPredict();
   }
 
   //查看网站访问量
@@ -1368,9 +1383,11 @@ handleuploadpredict = () => {
                 <div className = {this.state.showHelp? style.help:style.helpHide}>
                     <Help showHelp={this.state.showHelp} handleShowAPI={this.handleShowAPI}/>
                 </div>
-        <div className = {this.state.showDashboard? style.help:style.helpHide}>
-          <DashboardTracking />
-        </div>
+        {this.state.showDashboard && (
+          <div className={style.help}>
+            <DashboardTracking />
+          </div>
+        )}
                 <div className ={this.state.showProfile? style.profile:style.profileHide}>
                     <Profile userId = {this.state.userId} 
                              space = {this.state.space} 
