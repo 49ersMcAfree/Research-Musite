@@ -17,6 +17,32 @@ function getPreviousDay() {
   return `${year}-${month}-${day}`;
 }
 
+// Build a Matomo fetch URL using client env vars when provided.
+// If REACT_APP_MATOMO_URL and REACT_APP_MATOMO_TOKEN are set, call Matomo
+// directly from the browser. Otherwise, attempt same-origin /matomo/* then
+// fall back to the local proxy on port 3344 (legacy behavior).
+function buildMatomoFetch(path, asText = false) {
+  const clientUrl = process.env.REACT_APP_MATOMO_URL;
+  const clientToken = process.env.REACT_APP_MATOMO_TOKEN;
+  const fallbackProxy = 'http://localhost:3344';
+
+  // If client-side Matomo URL is configured, construct a full URL and append token.
+  if (clientUrl && clientToken) {
+    // Ensure no double-slash
+    const base = clientUrl.replace(/\/$/, '');
+    const sep = path.indexOf('?') === -1 ? '?' : '&';
+    const url = `${base}${path}${sep}token_auth=${encodeURIComponent(clientToken)}&format=${asText ? 'xml' : 'json'}`;
+    return fetch(url).then(r => {
+      if (!r.ok) throw new Error(`Matomo request failed ${r.status}`);
+      return asText ? r.text() : r.json();
+    });
+  }
+
+  // Otherwise try same-origin /matomo/* (served by proxy or server), then host fallback
+  const trySameOrigin = () => fetch(path).then(r => { if (!r.ok) throw new Error('not ok'); return asText ? r.text() : r.json(); });
+  return trySameOrigin().catch(() => fetch(fallbackProxy + path).then(r => { if (!r.ok) throw new Error('not ok'); return asText ? r.text() : r.json(); }));
+}
+
 function parseLast12MonthXml(xmlString) {
   try {
     const parser = new DOMParser();
@@ -50,10 +76,12 @@ class DashboardTracking extends React.Component {
 
   componentDidMount() {
     const prevDate = getPreviousDay();
-    const fetchLive = fetch(`/matomo/visits/last1day?date=${encodeURIComponent(prevDate)}`).then(r => r.json());
-    const fetchSummary = fetch(`/matomo/visits/summary?date=${encodeURIComponent(prevDate)}`).then(r => r.json());
-    const fetchMonths = fetch(`/matomo/visits/last12months`).then(r => r.text());
-    const fetchCities = fetch(`/matomo/cities?date=${encodeURIComponent(prevDate)}`).then(r => r.json());
+  // Build fetches. `buildMatomoFetch` will use client-side Matomo URL/token if provided
+  // or fall back to existing same-origin+proxy behavior.
+  const fetchLive = buildMatomoFetch(`/matomo/visits/last1day?date=${encodeURIComponent(prevDate)}`, false);
+  const fetchSummary = buildMatomoFetch(`/matomo/visits/summary?date=${encodeURIComponent(prevDate)}`, false);
+  const fetchMonths = buildMatomoFetch(`/matomo/visits/last12months`, true);
+  const fetchCities = buildMatomoFetch(`/matomo/cities?date=${encodeURIComponent(prevDate)}`, false);
 
     Promise.allSettled([fetchLive, fetchSummary, fetchMonths, fetchCities])
       .then(results => {
