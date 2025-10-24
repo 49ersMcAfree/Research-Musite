@@ -75,13 +75,16 @@ class DashboardTracking extends React.Component {
   }
 
   componentDidMount() {
-    const prevDate = getPreviousDay();
-  // Build fetches. `buildMatomoFetch` will use client-side Matomo URL/token if provided
-  // or fall back to existing same-origin+proxy behavior.
-  const fetchLive = buildMatomoFetch(`/matomo/visits/last1day?date=${encodeURIComponent(prevDate)}`, false);
-  const fetchSummary = buildMatomoFetch(`/matomo/visits/summary?date=${encodeURIComponent(prevDate)}`, false);
-  const fetchMonths = buildMatomoFetch(`/matomo/visits/last12months`, true);
-  const fetchCities = buildMatomoFetch(`/matomo/cities?date=${encodeURIComponent(prevDate)}`, false);
+    // Use today's date for live/summary checks so the dashboard shows
+    // the most recent activity. Previously this requested the previous
+    // day which can make the UI show 0 even when today's visits exist.
+    const dateParam = 'today';
+    // Build fetches. `buildMatomoFetch` will use client-side Matomo URL/token if provided
+    // or fall back to existing same-origin+proxy behavior.
+    const fetchLive = buildMatomoFetch(`/matomo/visits/last1day?date=${encodeURIComponent(dateParam)}`, false);
+    const fetchSummary = buildMatomoFetch(`/matomo/visits/summary?date=${encodeURIComponent(dateParam)}`, false);
+    const fetchMonths = buildMatomoFetch(`/matomo/visits/last12months`, true);
+    const fetchCities = buildMatomoFetch(`/matomo/cities?date=${encodeURIComponent(dateParam)}`, false);
 
     Promise.allSettled([fetchLive, fetchSummary, fetchMonths, fetchCities])
       .then(results => {
